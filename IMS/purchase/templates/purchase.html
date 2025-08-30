@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="main-content">
+  <h1 class="mb-4">Purchases</h1>
+
+  <div class="mb-3 d-flex  align-items-center">
+    <a href="#" class="btn btn-success">Add Purchase</a>
+     <a href="#" class="btn btn-danger ms-2">Add Supplier</a>
+  </div>
+
+  <div class="card p-3">
+    <div class="table-responsive">
+      <table class="table table-striped table-hover table-bordered">
+        <thead class="table-dark">
+          <tr>
+            <th>S.No.</th>
+            <th>Invoice No</th>
+            <th>Supplier</th>
+            <th>Date</th>
+            <th>Total Amount (Rs)</th>
+            <th>Tax (Rs)</th>
+            <th>Grand Amount (Rs)</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for purchase in purchases %}
+          <tr>
+            <td>{{ forloop.counter }}</td>
+            <td>{{ purchase.invoice_no }}</td>
+            <td>{{ purchase.supplier.supplier_name }}</td>
+            <td>{{ purchase.date|date:"d M, Y" }}</td>
+            <td>{{ purchase.total_amount }}</td>
+            <td>{{ purchase.tax }}</td>
+            <td>{{ purchase.Grand_amount }}</td>
+            <td>
+              <a href="{% url 'purchase_detail' purchase.id  %}" class="btn btn-primary btn-sm">
+                View Details
+              </a>
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="8" class="text-center">No purchases found.</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

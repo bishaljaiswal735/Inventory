@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+{% block content %}
+  <div class="main-content">
+    <h1 class="mb-4">Dashboard</h1>
+    
+    <div class="row g-4 mb-4">
+      <div class="col-md-3">
+        <div class="card text-center p-3">
+          <h5>Total Products</h5>
+          <h3>150</h3>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="card text-center p-3">
+          <h5>Total Customers</h5>
+          <h3>87</h3>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="card text-center p-3">
+          <h5>Monthly Sales</h5>
+          <h3>₹2,45,000</h3>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="card text-center p-3">
+          <h5>Pending Orders</h5>
+          <h3>12</h3>
+        </div>
+      </div>
+    </div>
+
+    <div class="row g-4">
+      <div class="col-md-7">
+        <div class="card p-3">
+          <h5>Inventory</h5>
+          <table class="table table-striped">
+            <thead>
+              <tr>
+                <th>Product</th>
+                <th>SKU</th>
+                <th>Price</th>
+                <th>Stock</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Apple iPhone 13</td>
+                <td>IP13</td>
+                <td>₹79,000</td>
+                <td>34</td>
+                <td class="text-success">In stock</td>
+              </tr>
+              <tr>
+                <td>Samsung Galaxy S21</td>
+                <td>SGS21</td>
+                <td>₹66,000</td>
+                <td>12</td>
+                <td class="text-success">In stock</td>
+              </tr>
+              <tr>
+                <td>Sony WH-1000XM4</td>
+                <td>SWH100</td>
+                <td>₹29,000</td>
+                <td>8</td>
+                <td class="text-danger">Out of stock</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="col-md-5">
+        <div class="card p-3">
+          <h5>Sales Overview</h5>
+          <canvas id="salesChart"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+{% endblock %}

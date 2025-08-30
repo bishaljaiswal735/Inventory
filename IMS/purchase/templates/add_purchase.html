@@ -1,0 +1,140 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="main-content">
+  <div class="container mt-4">
+    <div class="card shadow-lg p-4 rounded-3">
+      <h2 class="mb-4 text-center">Add Purchase</h2>
+
+      <form method="post">
+        {% csrf_token %}
+
+        <!-- Supplier & Invoice Info -->
+        <div class="row mb-4">
+          <div class="col-md-6">
+            <label for="supplier" class="form-label">Supplier</label>
+            {{ form.supplier }}
+          </div>
+          <div class="col-md-6">
+            <label for="invoice_no" class="form-label">Invoice No</label>
+            {{ form.invoice_no }}
+          </div>
+        </div>
+
+        <div class="row mb-4">
+          <div class="col-md-4">
+            <label for="vat_no" class="form-label">VAT Number</label>
+           <input type="text" class="form-control" id="vat_no" name="vat_no"  readonly>
+
+          </div>
+          <div class="col-md-4">
+            <label for="phone" class="form-label">Phone Number</label>
+            <input type="text" class="form-control" id="phone" name="phone"  readonly>
+
+          </div>
+          <div class="col-md-4">
+            <label for="address" class="form-label">Address</label>
+            <input class="form-control" id="address" name="address" rows="3"  readonly>
+
+          </div>
+        </div>
+
+        <!-- Products Table -->
+        <h5 class="mt-4 mb-3">Products</h5>
+        <table class="table table-bordered" id="products-table">
+          <thead class="table-light">
+            <tr>
+              <th style="width: 250px;">Product</th>
+              <th>Size</th>
+              <th>Length(inch)</th>
+              <th>Quantity</th>
+              <th>Price</th>
+              <th>Total</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>
+              </td>
+              <td><input type="number" name="qty_1" class="form-control" min="1" value="1"></td>
+              <td><input type="number" name="price_1" class="form-control" step="0.01"></td>
+              <td><input type="number" name="total_1" class="form-control" step="0.01" readonly></td>
+              <td><button type="button" class="btn btn-danger btn-sm remove-row">Remove</button></td>
+            </tr>
+          </tbody>
+        </table>
+
+        <button type="button" id="add-product" class="btn btn-secondary mb-4">Add Product</button>
+
+        <!-- Grand Total -->
+        <div class="mb-3 text-end">
+          <label class="form-label fw-bold">Grand Total:</label>
+          <input type="number" name="grand_total" class="form-control w-25 d-inline-block" readonly>
+        </div>
+
+        <!-- Submit Button -->
+        <div class="d-grid">
+          <button type="submit" class="btn btn-primary btn-lg">Save Purchase</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Optional JS to add/remove product rows -->
+<script>
+  let counter = 2; // start from 2 as first row is 1
+  document.getElementById('add-product').addEventListener('click', function() {
+    const tbody = document.querySelector('#products-table tbody');
+    const row = document.createElement('tr');
+    row.innerHTML = `
+      <td>
+        <select name="product_${counter}" class="form-select">
+          <option value="">Select Product</option>
+          <option value="1">Product A</option>
+          <option value="2">Product B</option>
+        </select>
+      </td>
+      <td><input type="number" name="qty_${counter}" class="form-control" min="1" value="1"></td>
+      <td><input type="number" name="price_${counter}" class="form-control" step="0.01"></td>
+      <td><input type="number" name="total_${counter}" class="form-control" step="0.01" readonly></td>
+      <td><button type="button" class="btn btn-danger btn-sm remove-row">Remove</button></td>
+    `;
+    tbody.appendChild(row);
+    counter++;
+  });
+
+  document.addEventListener('click', function(e) {
+    if (e.target && e.target.classList.contains('remove-row')) {
+      e.target.closest('tr').remove();
+    }
+  });
+  document.addEventListener('DOMContentLoaded', function() {
+    const supplierSelect = document.querySelector('select[name="supplier"]');
+    const vatInput = document.querySelector('input[name="vat_no"]');
+    const phoneInput = document.querySelector('input[name="phone"]');
+    const addressInput = document.querySelector('input[name="address"]');
+
+    supplierSelect.addEventListener('change', function() {
+        const supplierId = this.value;
+        if (!supplierId) {
+            vatInput.value = '';
+            phoneInput.value = '';
+            addressInput.value = '';
+            return;
+        }
+
+        fetch(`/purchase/supplier_info/${supplierId}/`)
+            .then(response => response.json())
+            .then(data => {
+                if (!data.error) {
+                    vatInput.value = data.vat_no;
+                    phoneInput.value = data.phone;
+                    addressInput.value = data.address;
+                }
+            })
+            .catch(error => console.log(error));
+    });
+});
+</script>
+{% endblock %}
