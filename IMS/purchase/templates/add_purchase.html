@@ -1,13 +1,15 @@
 {% extends "base.html" %}
+{% load static %}
+{% load widget_tweaks %}
 {% block content %}
 <div class="main-content">
   <div class="container mt-4">
     <div class="card shadow-lg p-4 rounded-3">
       <h2 class="mb-4 text-center">Add Purchase</h2>
-
-      <form method="post">
+        {% include "includes/alerts.html" %}
+      <form method="post" action = "{% url 'add_purchase' %}">
         {% csrf_token %}
-
+        {{ formset.management_form }}
         <!-- Supplier & Invoice Info -->
         <div class="row mb-4">
           <div class="col-md-6">
@@ -23,15 +25,15 @@
         <div class="row mb-4">
           <div class="col-md-4">
             <label for="vat_no" class="form-label">VAT Number</label>
-            <input type="text" class="form-control" id="vat_no" name="vat_no" readonly />
+            <input type="text" class="form-control" id="vat_no" name="vat_no" {% if data %}value={{data.vat_no}} {% endif %} readonly />
           </div>
           <div class="col-md-4">
             <label for="phone" class="form-label">Phone Number</label>
-            <input type="text" class="form-control" id="phone" name="phone" readonly />
+            <input type="text" class="form-control" id="phone" name="phone" {% if data %}value={{data.phone}} {% endif %} readonly />
           </div>
           <div class="col-md-4">
             <label for="address" class="form-label">Address</label>
-            <input class="form-control" id="address" name="address" rows="3" readonly />
+            <input class="form-control" id="address" name="address" rows="3" {% if data %}value="{{data.address}}"" {% endif %} readonly />
           </div>
         </div>
 
@@ -51,16 +53,18 @@
             </tr>
           </thead>
           <tbody>
+            {% for f in formset %}
             <tr>
-              <td>1</td>
-              <td><input type="text" name="product_1" class="form-control product-input" /></td>
-              <td><input type="text" name="size_1" class="form-control size-input" value="----" /></td>
-              <td><input type="text" name="length_1" class="form-control length-input" value="----" /></td>
-              <td><input type="number" name="qty_1" class="form-control" min="1" value="1" /></td>
-              <td><input type="number" name="price_1" class="form-control" step="0.01" /></td>
-              <td><input type="text" name="total_1" class="form-control"  readonly /></td>
+              <td>{{ forloop.counter  }}</td>
+              <td>{{ f.product |attr:"class:form-control product-input " }}</td>
+              <td>{{ f.size |attr:"class:form-control size-input" }}</td>
+              <td>{{ f.length |attr:"class:form-control length-input" }}</td>
+              <td>{{ f.qty |attr:"class:form-control qty-input"}}</td>
+              <td>{{ f.price |attr:"class:form-control price-input"}}</td>
+              <td>{{ f.total |attr:"class:form-control total-input"}}</td>
               <td><button type="button" class="btn btn-danger btn-sm remove-row">Remove</button></td>
             </tr>
+            {% endfor %}
           </tbody>
         </table>
 
@@ -73,7 +77,7 @@
                 <label class="form-label fw-semibold">Grand Total:</label>
                 </div>
                 <div class="col-auto">
-                <input type="number" name="grand_total" class="form-control rounded-3" readonly />
+                <input type="number" name="grand_total" class="form-control rounded-3" {% if data %}value={{data.grand_total}} {% endif %} readonly />
                 </div>
             </div>
 
@@ -82,7 +86,7 @@
                 <label class="form-label fw-semibold">VAT (13%):</label>
                 </div>
                 <div class="col-auto">
-                <input type="number" name="VAT" class="form-control rounded-3" readonly />
+                <input type="number" name="VAT" class="form-control rounded-3" {% if data %}value={{data.VAT}} {% endif %} readonly />
                 </div>
             </div>
 
@@ -91,11 +95,10 @@
                 <label class="form-label fw-semibold">Total Amount:</label>
                 </div>
                 <div class="col-auto">
-                <input type="number" name="total_amount" class="form-control rounded-3" readonly />
+                <input type="number" name="total_amount" class="form-control rounded-3"  {% if data %}value={{data.total_amount}} {% endif %}readonly />
                 </div>
             </div>
-       </div>
-
+        </div>
         <!-- Submit Button -->
         <div class="d-grid">
           <button type="submit" class="btn btn-primary btn-lg">Save Purchase</button>
@@ -106,13 +109,18 @@
 </div>
 
 <script>
+function updateTotalRows() {
+    const rows = document.querySelectorAll("#products-table tbody tr").length;
+    document.getElementById("total_rows").value = rows;
+}
+
 function attachAutocomplete(row) {
-    const productInput = row.querySelector(".product-input");
-    const sizeInput = row.querySelector(".size-input");
-    const lengthInput = row.querySelector(".length-input");
-    const qtyInput = row.querySelector("input[name^='qty_']");
-    const priceInput = row.querySelector("input[name^='price_']");
-    const totalInput = row.querySelector("input[name^='total_']");
+    const productInput = row.querySelector("input[name$='-product']");
+    const sizeInput = row.querySelector("input[name$='-size']");
+    const lengthInput = row.querySelector("input[name$='-length']");
+    const qtyInput = row.querySelector("input[name$='-qty']");
+    const priceInput = row.querySelector("input[name$='-price']");
+    const totalInput = row.querySelector(".total-input");
 
     // PRODUCT AUTOCOMPLETE
     $(productInput).autocomplete({
@@ -183,7 +191,7 @@ function attachAutocomplete(row) {
 // UPDATE GRAND TOTAL
 function updateGrandTotal() {
     let grandTotal = 0;
-    document.querySelectorAll("input[name^='total_']:not([name='grand_total']):not([name='total_amount'])").forEach(input => {
+    document.querySelectorAll(".total-input:not([name='grand_total']):not([name='total_amount'])").forEach(input => {
         grandTotal += parseFloat(input.value) || 0;
     });
 
@@ -226,9 +234,10 @@ function checkFieldsTable() {
 
     const rows = document.querySelectorAll("#products-table tbody tr");
     rows.forEach(row => {
-        const productInput = row.querySelector('input[name^="product_"]');
-        const qtyInput = row.querySelector('input[name^="qty_"]');
-        const priceInput = row.querySelector('input[name^="price_"]');
+        
+      const productInput = row.querySelector("input[name$='-product']");
+       const qtyInput = row.querySelector("input[name$='-qty']");
+       const priceInput = row.querySelector("input[name$='-price']");
 
         if (!productInput.value.trim() || !qtyInput.value.trim() || !priceInput.value.trim()) {
             disable = true;
@@ -241,30 +250,30 @@ function checkFieldsTable() {
 // ATTACH AUTOCOMPLETE TO EXISTING ROWS
 document.querySelectorAll("#products-table tbody tr").forEach(row => attachAutocomplete(row));
 
-// ADD PRODUCT ROW DYNAMICALLY
-let counter = document.querySelectorAll("#products-table tbody tr").length + 1;
-
+let totalFormsInput = document.getElementById('id_products-TOTAL_FORMS');
+let counter = parseInt(totalFormsInput.value);
 document.getElementById("add-product").addEventListener("click", function() {
     checkEmptyFields();
     const tbody = document.querySelector("#products-table tbody");
     const row = document.createElement("tr");
     row.innerHTML = `
-        <td>${counter}</td>
-        <td><input type="text" name="product_${counter}" class="form-control product-input"></td>
-        <td><input type="text" name="size_${counter}" class="form-control size-input" value="----" ></td>
-        <td><input type="text" name="length_${counter}" class="form-control length-input" value="----" ></td>
-        <td><input type="number" name="qty_${counter}" class="form-control" min="1" value="1"></td>
-        <td><input type="number" name="price_${counter}" class="form-control" step="0.01"></td>
-        <td><input type="text" name="total_${counter}" class="form-control" readonly></td>
+        <td>${counter + 1}</td>
+        <td><input type="text" name="products-${counter}-product" class="form-control product-input"></td>
+        <td><input type="text" name="products-${counter}-size" class="form-control size-input" value="----"></td>
+        <td><input type="text" name="products-${counter}-length" class="form-control length-input" value="----"></td>
+        <td><input type="number" name="products-${counter}-qty" class="form-control" min="1" value="1"></td>
+        <td><input type="number" name="products-${counter}-price" class="form-control" step="0.01"></td>
+        <td><input type="text" name="products-${counter}-total" class="form-control total-input"  readonly></td>
         <td><button type="button" class="btn btn-danger btn-sm remove-row">Remove</button></td>
     `;
     tbody.appendChild(row);
 
     attachAutocomplete(row);
     counter++;
+    totalFormsInput.value = counter
     updateGrandTotal();
     toggleProductFields();
-    checkFieldsTable(); // update button state
+    checkFieldsTable();
 });
 
 // REMOVE ROW
@@ -310,7 +319,7 @@ document.addEventListener("DOMContentLoaded", function() {
             .catch(error => console.log(error));
     });
 
-    invoiceSelect.addEventListener("input", toggleProductFields); // input instead of change
+    invoiceSelect.addEventListener("input", toggleProductFields); 
 });
 </script>
 

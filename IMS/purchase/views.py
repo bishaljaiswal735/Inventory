@@ -1,9 +1,9 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from .models import Purchase, PurchaseProduct, Supplier
-from .forms import PurchaseForm
+from .forms import PurchaseForm , PurchaseProductFormSet
 from django.http import JsonResponse
 from stock.models import Product, Size_Variation, Length_Variation
-
+from django.contrib import messages
 
 # Create your views here.
 def supplier_info(request, supplier_id):
@@ -54,12 +54,49 @@ def purchase_detail(request, purchase_id):
 
 
 def add_purchase(request):
-    form = PurchaseForm()
-    products = Product.objects.all()
-    sizes = Size_Variation.objects.all()
-    lengths = Length_Variation.objects.all()
-    return render(
-        request,
-        "add_purchase.html",
-        {"form": form, "products": products, "sizes": sizes, "lengths": lengths},
-    )
+   if request.method == "POST":
+         form = PurchaseForm(request.POST)
+         formset = PurchaseProductFormSet(request.POST,prefix='products')
+         for item in formset.cleaned_data:
+                        print(item)
+         if form.is_valid() and formset.is_valid():
+              purchase = form.save(commit=False)
+              checkExistingPurchase = Purchase.objects.filter(invoice_no__iexact = purchase.invoice_no).exists()
+              if checkExistingPurchase :
+                    messages.error(request,"Invoice Number is Matched.Change Invoice Number!!")
+                    return render(request,'add_purchase.html',{"form": form,'formset':formset, 'data': request.POST})
+              else:
+                   purchase.save()
+                   for item in formset:
+                        purchase_product = PurchaseProduct()
+                        purchase_product.purchase = purchase
+                        name = item.cleaned_data['product']
+                        size = item.cleaned_data['size']
+                        length = item.cleaned_data['length']
+                        quantity = item.cleaned_data['qty']
+                        unit_price = item.cleaned_data['price']
+                        print(size,length)
+                        try:
+                             product = Product.objects.get(product_name__iexact=name)
+                        except Product.DoesNotExist:
+                            if size == '----' and length == '----':
+                             product = Product.objects.create(product_name = name.title(), price = unit_price )  
+                            else:
+                              product = Product.objects.create(product_name = name.title() )  
+                        try:
+                             size = Size_Variation.objects.get(product = product,size = size, price_per_unit = unit_price)
+                             size.stock += quantity
+                             size.save()
+                        except Size_Variation.DoesNotExist:
+                             size = Size_Variation.objects.create(product = product, size = size, price_per_unit =  unit_price, stock = quantity)
+                       
+
+                   return redirect('purchase')
+   else:
+        form = PurchaseForm()
+        formset = PurchaseProductFormSet(prefix='products')
+        return render(
+            request,
+            "add_purchase.html",
+            {"form": form,'formset':formset},
+        )

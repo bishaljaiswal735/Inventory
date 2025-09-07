@@ -95,3 +95,51 @@ h5 {
 .btn-primary:hover {
   background-color: #0069d9;
 }
+
+
+/* alert message css */
+.messages-container {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  width: 300px;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  font-family: Arial, sans-serif;
+}
+
+.alert-box {
+  position: relative;
+  padding: 15px 20px 15px 15px;
+  border-radius: 8px;
+  color: #fff;
+  font-size: 14px;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  opacity: 1;
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+/* Different message types */
+.alert-success { background-color: #28a745; }
+.alert-error   { background-color: #dc3545; }
+.alert-warning { background-color: #ffc107; color: #212529; }
+.alert-info    { background-color: #17a2b8; }
+
+/* Close button */
+.close-btn {
+  position: absolute;
+  top: 8px;
+  right: 10px;
+  cursor: pointer;
+  font-size: 18px;
+  font-weight: bold;
+  color: inherit;
+}
+
+/* Fade-out class */
+.fade-out {
+  opacity: 0;
+  transform: translateX(50px);
+}

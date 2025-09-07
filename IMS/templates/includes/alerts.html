@@ -1,0 +1,33 @@
+{% if messages %}
+  <div class="messages-container">
+    {% for message in messages %}
+      <div class="alert-box alert-{{ message.tags }}"  >
+        <span class="alert-text">
+          {% if message.level == DEFAULT_MESSAGE_LEVELS.ERROR %}Error: {% endif %}
+          {{ message }}
+        </span>
+        <span class="close-btn" onclick="this.parentElement.style.display='none';">&times;</span>
+      </div>
+    {% endfor %}
+  </div>
+{% endif %}
+
+<script>
+  // Auto fade after 5 seconds
+  window.addEventListener('DOMContentLoaded', (event) => {
+    const alerts = document.querySelectorAll('.alert-box');
+    alerts.forEach((alert) => {
+      setTimeout(() => {
+        alert.classList.add('fade-out');
+        // remove from DOM after fade
+        setTimeout(() => alert.remove(), 500);
+      }, 5000);
+    });
+  });
+
+  // Close button
+  function closeAlert(el) {
+    el.parentElement.classList.add('fade-out');
+    setTimeout(() => el.parentElement.remove(), 500);
+  }
+</script>
