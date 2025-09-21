@@ -7,7 +7,7 @@
     <div class="card shadow-lg p-4 rounded-3">
       <h2 class="mb-4 text-center">Add Purchase</h2>
         {% include "includes/alerts.html" %}
-      <form method="post" action = "{% url 'add_purchase' %}">
+      <form method="post">
         {% csrf_token %}
         {{ formset.management_form }}
         <!-- Supplier & Invoice Info -->
@@ -77,7 +77,7 @@
                 <label class="form-label fw-semibold">Grand Total:</label>
                 </div>
                 <div class="col-auto">
-                <input type="number" name="grand_total" class="form-control rounded-3" {% if data %}value={{data.grand_total}} {% endif %} readonly />
+                <input type="number" name="grand_total" class="form-control rounded-3"  value="{% if data %}{{ data.grand_total }}{% endif %}" readonly />
                 </div>
             </div>
 
@@ -86,7 +86,7 @@
                 <label class="form-label fw-semibold">VAT (13%):</label>
                 </div>
                 <div class="col-auto">
-                <input type="number" name="VAT" class="form-control rounded-3" {% if data %}value={{data.VAT}} {% endif %} readonly />
+                <input type="number" name="VAT" class="form-control rounded-3"  value="{% if data %}{{ data.VAT }}{% endif %}" readonly />
                 </div>
             </div>
 
@@ -95,7 +95,7 @@
                 <label class="form-label fw-semibold">Total Amount:</label>
                 </div>
                 <div class="col-auto">
-                <input type="number" name="total_amount" class="form-control rounded-3"  {% if data %}value={{data.total_amount}} {% endif %}readonly />
+                <input type="number" name="total_amount" class="form-control rounded-3"   value="{% if data %}{{ data.total_amount }}{% endif %}" readonly />
                 </div>
             </div>
         </div>
@@ -144,7 +144,7 @@ function attachAutocomplete(row) {
           $(sizeInput).autocomplete({
               source: function(request, response) {
                   $.ajax({
-                      url: `/purchase/get_sizes/${product_id}/`,
+                      url: `/purchase/get_sizes/`,
                       data: { q: request.term },
                       success: function(data) {
                           response(data.map(item => ({ label: item.size, value: item.size, id: item.id })));
@@ -161,7 +161,7 @@ function attachAutocomplete(row) {
                 $(lengthInput).autocomplete({
                     source: function(request, response) {
                         $.ajax({
-                            url: `/purchase/get_lengths/${size_id}/`,
+                            url: `/purchase/get_lengths/`,
                             data: { q: request.term },
                             success: function(data) {
                                 response(data.map(item => ({ label: item.length_in_inch, value: item.length_in_inch })));

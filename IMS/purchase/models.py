@@ -8,10 +8,17 @@ from decimal import Decimal
 class Supplier(models.Model):
     supplier_name = models.CharField(max_length=200)
     address = models.CharField(max_length=200, null=True, blank=True)
-    vat_no = models.IntegerField(max_length=15, null=True, blank=True)
+    vat_no = models.IntegerField( null=True, blank=True)
     phone = models.CharField(max_length=15)
     created_at = models.DateTimeField(auto_now_add=True)
     modified_at = models.DateTimeField(auto_now_add=True)
+
+    def save(self, *args, **kwargs):
+        if self.supplier_name or self.address:
+            # Capitalize first letter of each word
+            self.supplier_name = self.supplier_name.title()
+            self.address = self.address.title()
+        super().save(*args, **kwargs)
    
     def __str__(self):
        return self.supplier_name
@@ -30,9 +37,9 @@ class Purchase(models.Model):
 
 class PurchaseProduct(models.Model):
         purchase = models.ForeignKey(Purchase, on_delete=models.CASCADE, related_name="items")
-        product = models.ForeignKey(Product, on_delete=models.CASCADE)
-        size_variation = models.ForeignKey(Size_Variation, on_delete=models.CASCADE, null=True, blank=True)
-        length_variation = models.ForeignKey(Length_Variation, on_delete=models.CASCADE, null=True, blank=True)
+        product = models.ForeignKey(Product, on_delete=models.PROTECT)
+        size_variation = models.ForeignKey(Size_Variation, on_delete=models.PROTECT, null=True, blank=True)
+        length_variation = models.ForeignKey(Length_Variation, on_delete=models.PROTECT, null=True, blank=True)
         quantity = models.DecimalField(max_digits=10, decimal_places=2)
         unit_price = models.DecimalField(max_digits=10, decimal_places=2)
         total_price = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank = True)

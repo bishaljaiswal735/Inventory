@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="main-content">
+    <h1 class="mb-4">Suppliers</h1>
+          {% include "includes/alerts.html" %}
+
+    <!-- Top controls: Add + Search -->
+    <div class="d-flex justify-content-between mb-3">
+        <!-- Add Supplier Button -->
+        <a href="{% url 'add_supplier' %}" class="btn btn-primary">Add Supplier</a>
+
+        <!-- Search Box -->
+        <form method="get" class="d-flex">
+            <input type="text" name="q" value="{{ request.GET.q }}" class="form-control me-2" placeholder="Search supplier...">
+            <button type="submit" class="btn btn-outline-secondary">Search</button>
+             <a href="{% url 'supplier_list' %}" class="btn btn-secondary ms-2">Clear</a>
+        </form>
+    </div>
+
+    <!-- Supplier Table -->
+    <div class="card p-3">
+        <div class="table-responsive">
+            <table class="table table-striped table-hover table-bordered">
+                <thead class="table-dark">
+                    <tr>
+                        <th>S.No</th>
+                        <th>Supplier Name</th>
+                        <th>Address</th>
+                        <th>VAT Number</th>
+                        <th>Phone</th>
+                        <th>Created At</th>
+                        <th>Modified At</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for supplier in suppliers %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td>{{ supplier.supplier_name }}</td>
+                        <td>{{ supplier.address|default:"-" }}</td>
+                        <td>{{ supplier.vat_no|default:"-" }}</td>
+                        <td>{{ supplier.phone }}</td>
+                        <td>{{ supplier.created_at|date:"d M, Y H:i" }}</td>
+                        <td>{{ supplier.modified_at|date:"d M, Y H:i" }}</td>
+                        <td>
+                            <a href="{% url 'supplier_modify' supplier.id %}" class="btn btn-sm btn-warning">Modify</a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="8" class="text-center">No suppliers found.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

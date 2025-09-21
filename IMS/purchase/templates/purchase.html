@@ -2,10 +2,17 @@
 {% block content %}
 <div class="main-content">
   <h1 class="mb-4">Purchases</h1>
-
-  <div class="mb-3 d-flex  align-items-center">
-    <a href="#" class="btn btn-success">Add Purchase</a>
-     <a href="#" class="btn btn-danger ms-2">Add Supplier</a>
+  {% include "includes/alerts.html" %}
+  <div class="mb-3 d-flex justify-content-between ">
+    <div class='d-flex align-item-center'>
+    <a href="{% url 'add_purchase' %}" class="btn btn-success">Add Purchase</a>
+     <a href="{% url 'supplier_list' %}" class="btn btn-danger ms-2">Supplier List</a>
+    </div>
+      <form method="get" class="d-flex">
+            <input type="text" name="q" value="{{ request.GET.q }}" class="form-control me-2" placeholder="Search supplier...">
+            <button type="submit" class="btn btn-outline-secondary">Search</button>
+             <a href="{% url 'purchase' %}" class="btn btn-secondary ms-2">Clear</a>
+        </form>
   </div>
 
   <div class="card p-3">
@@ -36,6 +43,9 @@
             <td>
               <a href="{% url 'purchase_detail' purchase.id  %}" class="btn btn-primary btn-sm">
                 View Details
+              </a>
+               <a href="{% url 'purchase_modify' purchase.id  %}" class="btn btn-warning btn-sm ms-1">
+                Edit
               </a>
             </td>
           </tr>
